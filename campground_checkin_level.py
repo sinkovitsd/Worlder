@@ -65,8 +65,8 @@ def handle_event(event):
             if input_box.finished:
                 try:
                     response = input_box.text
-                    response.replace("*","")
-                    response.replace(" ","")
+                    response = response.replace("*","")
+                    response = response.replace(" ","")
                     response = float(response)
                 except ValueError:
                     input_box.clear()
