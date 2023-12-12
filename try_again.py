@@ -7,11 +7,11 @@ try_again_sign.set_colorkey((127,127,127))
 def show():
     global active
     active = True
-    pygame.time.set_timer(pygame.USEREVENT, 2000, 1)
+    pygame.time.set_timer(pygame.USEREVENT+16, 2000, 1)
 
 def handle_event(event, input_box):
     global active
-    if event.type == pygame.USEREVENT:
+    if event.type == pygame.USEREVENT+16:
         active = False
         input_box.clear()
         input_box.open()

@@ -8,7 +8,7 @@ import importlib
 levels = ["start_level", "wall_level", "stream_level", "cave_level", 
           "underground_level", "underground_3_paths_level", "path_up_level", 
           "campground_checkin_level", "tent_level", "snowy_level"]
-level_index = 8
+level_index = 9
 
 pygame.init()
 pygame.font.init()
@@ -40,6 +40,7 @@ x = player_image.get_width()/2*0.7
 player = Sprite3D(player_image, pos=level.start_pos, origin=Vector2(player_image.get_width()/2, player_image.get_height()-18*scale),
                   collide_shape=Polygon(local_points=[[-x,-x/5], [x,-x/5], [x, x/5], [-x, x/5]]))
 player.images = [player_image, player_image2]
+player.facing = 1
 player.height = 610*scale
 
 #print("player", player.collide_shape.points)
@@ -75,8 +76,10 @@ while running:
     
     if player.vel.x > 0:
         player.image = player.images[0]
+        player.facing = 1
     if player.vel.x < 0:
         player.image = player.images[1]
+        player.facing = -1
 
     if player.pos.z <= level.ground(player.pos) and pygame.key.get_pressed()[K_SPACE]:
         player.vel.z = 1000
