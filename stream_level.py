@@ -92,10 +92,15 @@ def interact(player):
             global at_the_sign
             at_the_sign = True
     else:
-        c = contact.generate(player, arrow)
-        if c.overlap > 0:
+        if player.pos.x + player.origin.x - 30 > background.get_width():
             global go_to_next_level
             go_to_next_level = True
+        # c = contact.generate(player, arrow)
+        # if c.overlap > 0:
+        #     global go_to_next_level
+        #     go_to_next_level = True
+    for obj in sprites:
+        contact.generate(player, obj, resolve=True)
 
         
 def draw(window, characters):

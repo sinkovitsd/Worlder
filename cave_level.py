@@ -69,6 +69,8 @@ def interact(player):
     if c.overlap > 0:
         global at_the_sign
         at_the_sign = True
+    for obj in sprites:
+        contact.generate(player, obj, resolve=True)
         
 def draw(window, characters):
     window.blit(background, (0, 0))

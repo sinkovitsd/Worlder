@@ -5,10 +5,11 @@ from physics_objects import Sprite3D, Polygon
 import contact
 import importlib
 
-levels = ["start_level", "wall_level", "stream_level", "cave_level", 
+levels = ["title_level", "start_level", "wall_level", "stream_level", "cave_level", 
           "underground_level", "underground_3_paths_level", "path_up_level", 
-          "campground_checkin_level", "tent_level", "snowy_level"]
-level_index = 9
+          "campground_checkin_level", "tent_level", "snowy_level" ,"ocean_level",
+          "island_level", "end_credit_level"]
+level_index = 0
 
 pygame.init()
 pygame.font.init()
@@ -33,8 +34,8 @@ clock = pygame.time.Clock()
 fps = 60
 dt = 1/fps
 
-speed = 1000
 gravity = 2769
+jumping = False
 
 x = player_image.get_width()/2*0.7
 player = Sprite3D(player_image, pos=level.start_pos, origin=Vector2(player_image.get_width()/2, player_image.get_height()-18*scale),
@@ -42,10 +43,13 @@ player = Sprite3D(player_image, pos=level.start_pos, origin=Vector2(player_image
 player.images = [player_image, player_image2]
 player.facing = 1
 player.height = 610*scale
+player.speed = 1000
 
 #print("player", player.collide_shape.points)
 
-destination = Vector3(player.pos)
+buttons_active = False
+
+player.destination = Vector3(player.pos)
 running = True
 while running:
     pygame.display.update()
@@ -57,22 +61,31 @@ while running:
             running = False
         elif level.handle_event(event):
             pass
-        elif event.type==MOUSEBUTTONDOWN or event.type==MOUSEMOTION and pygame.mouse.get_pressed()[0]:
-            if event.pos[1] >= level.horizon:
-                destination = level.screen_to_world(event.pos)
+        elif event.type==MOUSEBUTTONDOWN or buttons_active and event.type==MOUSEMOTION and event.buttons[0]:
+            if event.type == MOUSEBUTTONDOWN:
+                buttons_active = True
+            pos = Vector2(event.pos)
+            if pos.y < level.horizon:
+                pos.y = level.horizon
+            player.destination = level.screen_to_world(pos)
+        elif event.type == KEYDOWN and event.key == K_SPACE:
+            jumping = True
+        elif event.type == KEYUP and event.key == K_SPACE:
+            jumping = False
+
                 
     player.clear_force()
     player.add_force(Vector3(0,0,-gravity))
     
-    r = destination - player.pos
+    r = player.destination - player.pos
     r.z = 0
        
     if player.pos.z <= level.ground(player.pos):
-        if r.magnitude() > speed * dt:
-            player.vel = r.normalize()*speed + Vector3(0,0,player.vel.z)
+        if r.magnitude() > player.speed * dt:
+            player.vel = r.normalize()*player.speed + Vector3(0,0,player.vel.z)
         else:
             player.vel = Vector3(0, 0, player.vel.z)
-            player.pos = destination + Vector3(0 , 0, player.pos.z)
+            player.pos = player.destination + Vector3(0 , 0, player.pos.z)
     
     if player.vel.x > 0:
         player.image = player.images[0]
@@ -81,12 +94,9 @@ while running:
         player.image = player.images[1]
         player.facing = -1
 
-    if player.pos.z <= level.ground(player.pos) and pygame.key.get_pressed()[K_SPACE]:
+    if player.pos.z <= level.ground(player.pos) and jumping and pygame.key.get_pressed()[K_SPACE]:
         player.vel.z = 1000
 
-    for obj in level.sprites:
-        contact.generate(player, obj, resolve=True)
-    
     player.update(dt)
     
     ground = level.ground(player.pos)
@@ -102,7 +112,11 @@ while running:
     level.interact(player)
     if level.go_to_next_level:
         level_index += 1
+        buttons_active = False
         print(level_index)
+        if level_index >= len(levels):
+            level_index = 0
+            print("Going back to the title screen.")
         print(levels[level_index])
         window.blit(loading, (0,0))
         pygame.display.update()
@@ -110,7 +124,7 @@ while running:
         pygame.event.clear()
         player.set(pos=level.start_pos)
         player.vel = Vector3(0,0,0)
-        destination = Vector3(player.pos)
+        player.destination = Vector3(player.pos)
         
     level.draw(window, [player])
    

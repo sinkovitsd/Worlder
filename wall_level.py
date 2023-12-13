@@ -48,7 +48,9 @@ def handle_event(event):
         if input_box.handle_event(event):
             if input_box.finished:
                 try:
-                    response = int(input_box.text)
+                    response = input_box.text
+                    response = response.replace(",","")
+                    response = float(response)
                 except ValueError:
                     input_box.clear()
                     input_box.open()
@@ -67,6 +69,9 @@ def interact(player):
     if c.overlap > 0:
         global at_the_door
         at_the_door = True
+    for obj in sprites:
+        contact.generate(player, obj, resolve=True)
+    
         
 
 def draw(window, characters):
